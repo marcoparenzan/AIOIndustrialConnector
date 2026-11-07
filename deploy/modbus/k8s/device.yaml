@@ -1,0 +1,22 @@
+# Device with one Modbus TCP inbound endpoint pointing at the in-cluster simulator.
+# Development only (kubectl). In production create the device in the operations experience
+# or with `az iot ops ns device create` + `az iot ops ns device endpoint inbound add custom`.
+apiVersion: namespaces.deviceregistry.microsoft.com/v1
+kind: Device
+metadata:
+  name: modbus-sim-device
+  namespace: azure-iot-operations
+spec:
+  attributes:
+    deviceType: modbus-simulator
+  enabled: true
+  endpoints:
+    inbound:
+      modbus-sim-endpoint:
+        endpointType: Custom.ModbusTcp
+        version: "1.0"
+        address: modbus-tcp://modbus-simulator.azure-iot-operations.svc.cluster.local:502
+        # Endpoint-level defaults (see docs/modbus/CONFIGURATION.md)
+        additionalConfiguration: '{"unitId": 1, "timeoutMs": 2000, "connectTimeoutMs": 3000}'
+  uuid: 6c1f4a52-5c0e-4a3e-9d1b-2a7b9f0e0001
+  version: 1

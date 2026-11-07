@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Self-contained S7 PLC simulator (ISO-on-TCP, S7comm read variable). No protocol library: it is an independent implementation. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>AioIndustrialConnector.S7.Simulator</RootNamespace>
+    <AssemblyName>S7Simulator</AssemblyName>
+    <Version>0.2.0</Version>
+    <!-- Container image (dotnet publish -t:PublishContainer) -->
+    <ContainerRepository>aio-s7-simulator</ContainerRepository>
+    <ContainerImageTag>$(Version)</ContainerImageTag>
+    <!-- Port 102 is privileged; the container listens on 10200 and the Kubernetes Service maps 102 -> 10200. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ContainerPort Include="10200" Type="tcp" />
+  </ItemGroup>
+
+</Project>

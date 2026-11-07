@@ -1,0 +1,22 @@
+# Device with one Siemens S7 inbound endpoint pointing at the in-cluster simulator.
+# Development only (kubectl). In production create the device in the operations experience
+# or with `az iot ops ns device create` + `az iot ops ns device endpoint inbound add custom`.
+apiVersion: namespaces.deviceregistry.microsoft.com/v1
+kind: Device
+metadata:
+  name: s7-sim-device
+  namespace: azure-iot-operations
+spec:
+  attributes:
+    deviceType: s7-simulator
+  enabled: true
+  endpoints:
+    inbound:
+      s7-sim-endpoint:
+        endpointType: Custom.SiemensS7
+        version: "1.0"
+        address: s7://s7-simulator.azure-iot-operations.svc.cluster.local:102
+        # Endpoint-level settings (see docs/s7/CONFIGURATION.md). The simulator accepts any rack/slot.
+        additionalConfiguration: '{"cpuType": "S71500", "rack": 0, "slot": 1, "timeoutMs": 2000, "connectTimeoutMs": 3000}'
+  uuid: 6c1f4a52-5c0e-4a3e-9d1b-2a7b9f0e0011
+  version: 1

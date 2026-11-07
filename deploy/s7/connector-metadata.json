@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json.schemastore.org/aio-connector-metadata-11.0-preview.json",
+  "name": "SiemensS7Connector",
+  "description": "Polls Siemens S7 PLCs (S7-300/400/1200/1500) over ISO-on-TCP (data blocks, memory, inputs, outputs) and publishes each asset dataset as a JSON object to the MQTT broker or the broker state store.",
+  "version": "0.2.0",
+  "isPreview": true,
+  "maintainer": "Marco Parenzan",
+  "vendor": "Marco Parenzan",
+  "imageConfigurationSettings": {
+    "imageName": "__REGISTRY__/aio-s7-connector",
+    "tag": "0.2.0"
+  },
+  "supportedArchitectures": [
+    "linux/amd64"
+  ],
+  "sourceCode": {
+    "language": "dotnet",
+    "languageVersion": "10.0",
+    "sdks": {
+      "mqttPackageVersion": "1.2.1",
+      "servicesPackageVersion": "1.4.0",
+      "connectorPackageVersion": "1.3.0"
+    }
+  },
+  "aioMetadata": {
+    "aioMinVersion": "1.2.37"
+  },
+  "endpointsEnabledByDefault": true,
+  "recommendedReplicas": 1,
+  "inboundEndpoints": [
+    {
+      "endpointType": "Custom.SiemensS7",
+      "description": "A Siemens S7 PLC (S7-300, S7-400, S7-1200, S7-1500) reachable over ISO-on-TCP on port 102.",
+      "version": "1.0",
+      "fields": {
+        "address": {
+          "input": "required",
+          "exampleValue": "s7://192.168.0.1:102",
+          "description": "S7 PLC address: s7://host:port (or host:port; the port defaults to 102)."
+        }
+      },
+      "supportedAuthenticationTypes": [ "anonymous" ],
+      "assetsEnabledByDefault": true,
+      "additionalConfigurationSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "S7 endpoint configuration",
+        "description": "Connection settings of the PLC; defaults for every asset that uses this endpoint.",
+        "type": "object",
+        "properties": {
+          "cpuType": {
+            "title": "CPU type",
+            "description": "CPU family. Selects how the connection (TSAP) is addressed.",
+            "type": "string",
+            "enum": [ "S7200", "S7200Smart", "Logo0BA8", "S7300", "S7400", "S71200", "S71500" ],
+            "default": "S71500"
+          },
+          "rack": {
+            "title": "Rack",
+            "description": "Rack number of the CPU. 0 for S7-1200/1500 and most S7-300.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7,
+            "default": 0
+          },
+          "slot": {
+            "title": "Slot",
+            "description": "Slot number of the CPU. 1 for S7-1200/1500 (0 also works), 2 for S7-300. Default: 2 for S7300, otherwise 1.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 31
+          },
+          "timeoutMs": {
+            "title": "Response timeout (ms)",
+            "description": "How long to wait for each S7 response.",
+            "type": "integer",
+            "minimum": 1,
+            "default": 3000
+          },
+          "connectTimeoutMs": {
+            "title": "Connect timeout (ms)",
+            "description": "How long to wait for the connection to be established.",
+            "type": "integer",
+            "minimum": 1,
+            "default": 5000
+          }
+        }
+      },
+      "datasets": {
+        "limits": {
+          "minimum": 1
+        },
+        "fields": {
+          "dataSource": {
+            "input": "unsupported"
+          },
+          "typeRef": {
+            "input": "unsupported"
+          }
+        },
+        "destinations": {
+          "supportedDestinations": [ "Mqtt", "BrokerStateStore" ],
+          "defaultDestination": {
+            "destination": "Mqtt",
+            "topic": "s7/{deviceName}/{assetName}/{datasetName}",
+            "qos": 1,
+            "ttl": 3600,
+            "retain": "never"
+          }
+        },
+        "datasetConfigurationSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "S7 dataset configuration",
+          "description": "Used for the asset default dataset configuration and for each dataset. A dataset value overrides the asset default.",
+          "type": "object",
+          "properties": {
+            "samplingIntervalMs": {
+              "title": "Sampling interval (ms)",
+              "description": "How often the dataset is read and published.",
+              "type": "integer",
+              "minimum": 10,
+              "default": 1000
+            },
+            "maxBytesPerRead": {
+              "title": "Max bytes per request",
+              "description": "Upper bound of one merged read request. Larger requests are split into PDU-sized chunks automatically.",
+              "type": "integer",
+              "minimum": 1,
+              "default": 200
+            },
+            "maxGap": {
+              "title": "Max address gap",
+              "description": "Data points up to this many unused bytes apart are read in one request. Reading a gap inside an existing data block is harmless.",
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        },
+        "dataPoints": {
+          "limits": {
+            "minimum": 1
+          },
+          "fields": {
+            "dataSource": {
+              "input": "required",
+              "exampleValue": "DB1.DBD0",
+              "description": "S7 absolute address: DB<n>.DBX<byte>.<bit>, DB<n>.DBB/DBW/DBD<byte>, or M/I/Q with bit (M0.1) or width B/W/D (MW10). German E/A are accepted for I/Q."
+            },
+            "typeRef": {
+              "input": "unsupported"
+            }
+          },
+          "dataPointConfigurationSchema": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "S7 data point configuration",
+            "description": "How to decode one value. The address width fixes the default type: X Boolean, B Byte, W UInt16, D UInt32.",
+            "type": "object",
+            "properties": {
+              "dataType": {
+                "title": "Data type",
+                "description": "Boolean/Bool, Byte, SByte/SInt, Int16/Int, UInt16/UInt/Word, Int32/DInt, UInt32/UDInt/DWord, Int64/LInt, UInt64/ULInt/LWord, Float32/Real, Float64/LReal, or String (S7 STRING).",
+                "type": "string",
+                "enum": [
+                  "Boolean", "Bool", "Byte", "USInt", "SByte", "SInt",
+                  "Int16", "Int", "UInt16", "UInt", "Word",
+                  "Int32", "DInt", "UInt32", "UDInt", "DWord",
+                  "Int64", "LInt", "UInt64", "ULInt", "LWord",
+                  "Float32", "Real", "Float64", "LReal", "String"
+                ]
+              },
+              "length": {
+                "title": "String length",
+                "description": "Only for String: the declared size n of the S7 STRING[n] (characters).",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 254
+              },
+              "bit": {
+                "title": "Bit",
+                "description": "Only for a Boolean read from a B/W/D address: the bit to extract, 0 = least significant.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 31
+              },
+              "scale": {
+                "title": "Scale",
+                "description": "Published value = raw * scale + offset (numeric types only).",
+                "type": "number"
+              },
+              "offset": {
+                "title": "Offset",
+                "description": "See scale.",
+                "type": "number"
+              }
+            }
+          },
+          "alternativeTypeName": {
+            "singular": "tag",
+            "plural": "tags"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+# Modbus TCP simulator (src/Modbus/ModbusSimulator) running in the cluster.
+# The container listens on 5020 (non-privileged); the Service exposes the standard Modbus port 502.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: modbus-simulator
+  namespace: azure-iot-operations
+  labels:
+    app: modbus-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: modbus-simulator
+  template:
+    metadata:
+      labels:
+        app: modbus-simulator
+    spec:
+      containers:
+      - name: modbus-simulator
+        image: aio-modbus-simulator:0.2.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MODBUS_PORT
+          value: "5020"
+        - name: MODBUS_UNITS
+          value: "1,2"
+        - name: MODBUS_INTERVAL_MS
+          value: "1000"
+        ports:
+        - containerPort: 5020
+          name: modbus
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: modbus-simulator
+  namespace: azure-iot-operations
+spec:
+  type: ClusterIP
+  selector:
+    app: modbus-simulator
+  ports:
+  - name: modbus
+    port: 502
+    targetPort: 5020
+    protocol: TCP

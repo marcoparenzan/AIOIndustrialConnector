@@ -1,0 +1,74 @@
+# Asset mapping the simulator register map (docs/modbus/LOCAL-SIMULATION.md) to two datasets:
+#  - process: fast values to an MQTT topic every second
+#  - identity: slow-changing values to the broker state store every 30 s
+apiVersion: namespaces.deviceregistry.microsoft.com/v1
+kind: Asset
+metadata:
+  name: modbus-sim-asset
+  namespace: azure-iot-operations
+spec:
+  uuid: 6c1f4a52-5c0e-4a3e-9d1b-2a7b9f0e0002
+  attributes:
+    assetType: modbus-process-cell
+  deviceRef:
+    deviceName: modbus-sim-device
+    endpointName: modbus-sim-endpoint
+  # Defaults for every dataset of this asset
+  defaultDatasetsConfiguration: '{"samplingIntervalMs": 1000}'
+  datasets:
+  - name: process
+    datasetConfiguration: '{"samplingIntervalMs": 1000}'
+    destinations:
+    - target: Mqtt
+      configuration:
+        topic: modbus/modbus-sim-device/modbus-sim-asset/process
+        qos: Qos1
+        retain: Never
+        ttl: 3600
+    dataPoints:
+    - name: temperature
+      dataSource: hr:0
+      dataPointConfiguration: '{"dataType": "Float32"}'
+    - name: humidity
+      dataSource: hr:2
+      dataPointConfiguration: '{"dataType": "UInt16", "scale": 0.1}'
+    - name: cycleCounter
+      dataSource: hr:3
+      dataPointConfiguration: '{"dataType": "UInt32"}'
+    - name: pressureDelta
+      dataSource: "40006"          # Modicon notation = hr:5
+      dataPointConfiguration: '{"dataType": "Int16"}'
+    - name: running
+      dataSource: hr:6
+      dataPointConfiguration: '{"bit": 0}'
+    - name: alarm
+      dataSource: hr:6
+      dataPointConfiguration: '{"bit": 1}'
+    - name: flowRate
+      dataSource: ir:0
+      dataPointConfiguration: '{"dataType": "Float32", "wordOrder": "LittleEndian"}'
+    - name: tankLevelPercent
+      dataSource: ir:2
+      dataPointConfiguration: '{"dataType": "UInt16", "scale": 0.024420024420024, "offset": 0}'
+    - name: pumpOn
+      dataSource: coil:0
+    - name: valveOpen
+      dataSource: coil:1
+    - name: doorClosed
+      dataSource: di:0
+    - name: emergencyStop
+      dataSource: di:1
+  - name: identity
+    datasetConfiguration: '{"samplingIntervalMs": 30000}'
+    destinations:
+    - target: BrokerStateStore
+      configuration:
+        key: modbus-sim-asset-identity
+    dataPoints:
+    - name: serialNumber
+      dataSource: hr:10
+      dataPointConfiguration: '{"dataType": "String", "length": 8}'
+    - name: totalEnergyKWh
+      dataSource: hr:20
+      dataPointConfiguration: '{"dataType": "Float64"}'
+  version: 1

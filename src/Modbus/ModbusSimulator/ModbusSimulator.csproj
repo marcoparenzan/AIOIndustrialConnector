@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>AioIndustrialConnector.Modbus.Simulator</RootNamespace>
+    <AssemblyName>ModbusSimulator</AssemblyName>
+    <Version>0.2.0</Version>
+    <!-- Container image (dotnet publish /t:PublishContainer) -->
+    <ContainerRepository>aio-modbus-simulator</ContainerRepository>
+    <ContainerImageTag>$(Version)</ContainerImageTag>
+    <!-- Port 502 is privileged; the container listens on 5020 and the Kubernetes Service maps 502 -> 5020. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NModbus" Version="3.0.83" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ContainerPort Include="5020" Type="tcp" />
+  </ItemGroup>
+
+</Project>

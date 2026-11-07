@@ -1,0 +1,23 @@
+<Project>
+  <!--
+    Build output location, in order of preference:
+      1. the ArtifactsRoot property or the BUILD_ARTIFACTS environment variable;
+      2. D:\Dev\BuildArtifacts\AIOIndustrialConnector\ when D:\Dev\BuildArtifacts exists (the maintainer's layout);
+      3. artifacts\ inside the repository (git-ignored).
+  -->
+  <PropertyGroup>
+    <ArtifactsRoot Condition="'$(ArtifactsRoot)' == '' and '$(BUILD_ARTIFACTS)' != ''">$([MSBuild]::EnsureTrailingSlash('$(BUILD_ARTIFACTS)'))</ArtifactsRoot>
+    <ArtifactsRoot Condition="'$(ArtifactsRoot)' == '' and Exists('D:\Dev\BuildArtifacts')">D:\Dev\BuildArtifacts\AIOIndustrialConnector\</ArtifactsRoot>
+    <ArtifactsRoot Condition="'$(ArtifactsRoot)' == ''">$(MSBuildThisFileDirectory)artifacts\</ArtifactsRoot>
+    <BaseOutputPath>$(ArtifactsRoot)$(MSBuildProjectName)\bin\</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(ArtifactsRoot)$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Authors>Marco Parenzan</Authors>
+    <Copyright>Copyright (c) 2026 Marco Parenzan</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+</Project>

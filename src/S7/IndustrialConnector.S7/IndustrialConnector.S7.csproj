@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Siemens S7 protocol module: addresses, planning, decoding, S7netplus client. Depends on Core only. -->
+  <PropertyGroup>
+    <RootNamespace>AioIndustrialConnector.S7</RootNamespace>
+    <AssemblyName>IndustrialConnector.S7</AssemblyName>
+    <Version>0.2.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="S7netplus" Version="0.20.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\IndustrialConnector.Core\IndustrialConnector.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="IndustrialConnector.S7.Tests" />
+  </ItemGroup>
+
+</Project>

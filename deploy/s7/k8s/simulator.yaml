@@ -1,0 +1,53 @@
+# S7 PLC simulator (src/S7/S7Simulator) running in the cluster.
+# The container listens on 10200 (non-privileged); the Service exposes the standard S7 port 102.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s7-simulator
+  namespace: azure-iot-operations
+  labels:
+    app: s7-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s7-simulator
+  template:
+    metadata:
+      labels:
+        app: s7-simulator
+    spec:
+      containers:
+      - name: s7-simulator
+        image: aio-s7-simulator:0.2.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: S7_PORT
+          value: "10200"
+        - name: S7_INTERVAL_MS
+          value: "1000"
+        ports:
+        - containerPort: 10200
+          name: s7
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s7-simulator
+  namespace: azure-iot-operations
+spec:
+  type: ClusterIP
+  selector:
+    app: s7-simulator
+  ports:
+  - name: s7
+    port: 102
+    targetPort: 10200
+    protocol: TCP

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Protocol-neutral building blocks shared by every protocol module (Modbus, S7, ...). No protocol library here. -->
+  <PropertyGroup>
+    <RootNamespace>AioIndustrialConnector.Core</RootNamespace>
+    <AssemblyName>IndustrialConnector.Core</AssemblyName>
+    <Version>0.2.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Iot.Operations.Connector" Version="1.3.0" />
+    <PackageReference Include="Azure.Iot.Operations.Mqtt" Version="1.2.1" />
+    <PackageReference Include="Azure.Iot.Operations.Services" Version="1.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="IndustrialConnector.Core.Tests" />
+  </ItemGroup>
+
+</Project>

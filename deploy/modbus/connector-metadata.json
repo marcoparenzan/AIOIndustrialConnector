@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json.schemastore.org/aio-connector-metadata-11.0-preview.json",
+  "name": "ModbusTcpConnector",
+  "description": "Polls Modbus TCP devices (coils, discrete inputs, input and holding registers) and publishes each asset dataset as a JSON object to the MQTT broker or the broker state store.",
+  "version": "0.2.0",
+  "isPreview": true,
+  "maintainer": "Marco Parenzan",
+  "vendor": "Marco Parenzan",
+  "imageConfigurationSettings": {
+    "imageName": "__REGISTRY__/aio-modbus-connector",
+    "tag": "0.2.0"
+  },
+  "supportedArchitectures": [
+    "linux/amd64"
+  ],
+  "sourceCode": {
+    "language": "dotnet",
+    "languageVersion": "10.0",
+    "sdks": {
+      "mqttPackageVersion": "1.2.1",
+      "servicesPackageVersion": "1.4.0",
+      "connectorPackageVersion": "1.3.0"
+    }
+  },
+  "aioMetadata": {
+    "aioMinVersion": "1.2.37"
+  },
+  "endpointsEnabledByDefault": true,
+  "recommendedReplicas": 1,
+  "inboundEndpoints": [
+    {
+      "endpointType": "Custom.ModbusTcp",
+      "description": "A Modbus TCP server: a PLC, a gateway in front of Modbus RTU devices, or any device speaking Modbus TCP.",
+      "version": "1.0",
+      "fields": {
+        "address": {
+          "input": "required",
+          "exampleValue": "modbus-tcp://192.168.1.10:502",
+          "description": "Modbus TCP server address: modbus-tcp://host:port (or host:port; the port defaults to 502)."
+        }
+      },
+      "supportedAuthenticationTypes": [ "anonymous" ],
+      "assetsEnabledByDefault": true,
+      "additionalConfigurationSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Modbus TCP endpoint configuration",
+        "description": "Defaults for every asset that uses this endpoint. Datasets and data points can override unitId, byteOrder and wordOrder.",
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "title": "Unit id",
+            "description": "Modbus unit identifier (slave id). Use 1 for most TCP devices; set the RTU slave address when the endpoint is a TCP-to-RTU gateway.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "default": 1
+          },
+          "timeoutMs": {
+            "title": "Response timeout (ms)",
+            "description": "How long to wait for each Modbus response.",
+            "type": "integer",
+            "minimum": 1,
+            "default": 3000
+          },
+          "connectTimeoutMs": {
+            "title": "Connect timeout (ms)",
+            "description": "How long to wait for the TCP connection.",
+            "type": "integer",
+            "minimum": 1,
+            "default": 5000
+          },
+          "byteOrder": {
+            "title": "Byte order",
+            "description": "Order of the two bytes inside a register. BigEndian is the Modbus standard.",
+            "type": "string",
+            "enum": [ "BigEndian", "LittleEndian" ],
+            "default": "BigEndian"
+          },
+          "wordOrder": {
+            "title": "Word order",
+            "description": "Register order of 32/64-bit values. BigEndian = high word at the lower address; LittleEndian = word swapped.",
+            "type": "string",
+            "enum": [ "BigEndian", "LittleEndian" ],
+            "default": "BigEndian"
+          }
+        }
+      },
+      "datasets": {
+        "limits": {
+          "minimum": 1
+        },
+        "fields": {
+          "dataSource": {
+            "input": "unsupported"
+          },
+          "typeRef": {
+            "input": "unsupported"
+          }
+        },
+        "destinations": {
+          "supportedDestinations": [ "Mqtt", "BrokerStateStore" ],
+          "defaultDestination": {
+            "destination": "Mqtt",
+            "topic": "modbus/{deviceName}/{assetName}/{datasetName}",
+            "qos": 1,
+            "ttl": 3600,
+            "retain": "never"
+          }
+        },
+        "datasetConfigurationSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "Modbus dataset configuration",
+          "description": "Used for the asset default dataset configuration and for each dataset. A dataset value overrides the asset default.",
+          "type": "object",
+          "properties": {
+            "samplingIntervalMs": {
+              "title": "Sampling interval (ms)",
+              "description": "How often the dataset is read and published.",
+              "type": "integer",
+              "minimum": 10,
+              "default": 1000
+            },
+            "unitId": {
+              "title": "Unit id",
+              "description": "Overrides the endpoint unit id for this dataset.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "byteOrder": {
+              "title": "Byte order",
+              "type": "string",
+              "enum": [ "BigEndian", "LittleEndian" ]
+            },
+            "wordOrder": {
+              "title": "Word order",
+              "type": "string",
+              "enum": [ "BigEndian", "LittleEndian" ]
+            },
+            "maxRegistersPerRead": {
+              "title": "Max registers per request",
+              "description": "Upper bound of one read request for registers (protocol limit 125). Lower it for devices with smaller buffers.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 125,
+              "default": 125
+            },
+            "maxBitsPerRead": {
+              "title": "Max bits per request",
+              "description": "Upper bound of one read request for coils and discrete inputs (protocol limit 2000).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2000,
+              "default": 2000
+            },
+            "maxGap": {
+              "title": "Max address gap",
+              "description": "Data points up to this many unused addresses apart are read in one request. Keep 0 if the device rejects reads of unmapped addresses.",
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        },
+        "dataPoints": {
+          "limits": {
+            "minimum": 1
+          },
+          "fields": {
+            "dataSource": {
+              "input": "required",
+              "exampleValue": "hr:0",
+              "description": "Modbus address: hr:N (holding register), ir:N (input register), coil:N, di:N (discrete input), zero-based; or Modicon one-based 4xxxx/3xxxx/1xxxx/0xxxx, e.g. 40001 = hr:0."
+            },
+            "typeRef": {
+              "input": "unsupported"
+            }
+          },
+          "dataPointConfigurationSchema": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "Modbus data point configuration",
+            "description": "How to read and decode one value.",
+            "type": "object",
+            "properties": {
+              "dataType": {
+                "title": "Data type",
+                "description": "Boolean (coils, discrete inputs, register != 0 or a single bit), 16/32/64-bit integers, 32/64-bit IEEE floats, or an ASCII String. Default: UInt16 for registers, Boolean for coils/discrete inputs.",
+                "type": "string",
+                "enum": [ "Boolean", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64", "Float32", "Float64", "String" ]
+              },
+              "length": {
+                "title": "String length (registers)",
+                "description": "Only for String: number of registers (two characters each).",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 125
+              },
+              "bit": {
+                "title": "Bit",
+                "description": "Only for registers read as Boolean: the bit to extract, 0 = least significant.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 15
+              },
+              "scale": {
+                "title": "Scale",
+                "description": "Published value = raw * scale + offset (numeric types only).",
+                "type": "number"
+              },
+              "offset": {
+                "title": "Offset",
+                "description": "See scale.",
+                "type": "number"
+              },
+              "byteOrder": {
+                "title": "Byte order",
+                "type": "string",
+                "enum": [ "BigEndian", "LittleEndian" ]
+              },
+              "wordOrder": {
+                "title": "Word order",
+                "type": "string",
+                "enum": [ "BigEndian", "LittleEndian" ]
+              },
+              "unitId": {
+                "title": "Unit id",
+                "description": "Overrides the dataset/endpoint unit id for this data point.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              }
+            }
+          },
+          "alternativeTypeName": {
+            "singular": "register",
+            "plural": "registers"
+          }
+        }
+      }
+    }
+  ]
+}

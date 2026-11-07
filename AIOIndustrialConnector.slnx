@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/src/Core/">
+    <Project Path="src/Core/IndustrialConnector.Core/IndustrialConnector.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/Modbus/">
+    <Project Path="src/Modbus/IndustrialConnector.Modbus/IndustrialConnector.Modbus.csproj" />
+    <Project Path="src/Modbus/ModbusSimulator/ModbusSimulator.csproj" />
+  </Folder>
+  <Folder Name="/src/S7/">
+    <Project Path="src/S7/IndustrialConnector.S7/IndustrialConnector.S7.csproj" />
+    <Project Path="src/S7/S7Simulator/S7Simulator.csproj" />
+  </Folder>
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/IndustrialConnector/IndustrialConnector.csproj" />
+  </Folder>
+  <Folder Name="/src/Tools/">
+    <Project Path="src/Tools/IndustrialProbe/IndustrialProbe.csproj" />
+  </Folder>
+  <Folder Name="/tests/Core/">
+    <Project Path="tests/Core/IndustrialConnector.Core.Tests/IndustrialConnector.Core.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modbus/">
+    <Project Path="tests/Modbus/IndustrialConnector.Modbus.Tests/IndustrialConnector.Modbus.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/S7/">
+    <Project Path="tests/S7/IndustrialConnector.S7.Tests/IndustrialConnector.S7.Tests.csproj" />
+  </Folder>
+</Solution>

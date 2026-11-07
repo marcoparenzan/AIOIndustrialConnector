@@ -1,0 +1,33 @@
+# Development only: registers the S7 connector directly in the cluster (k3d / local AIO).
+# For a production instance, create the connector template from the Azure portal or with
+# `az iot ops connector template create` (see docs/s7/PORTAL.md); resources applied with kubectl
+# are not synchronized to Azure and do not appear in the portal.
+apiVersion: akri.iotoperations.azure.com/v1
+kind: ConnectorTemplate
+metadata:
+  name: s7-connector
+  namespace: azure-iot-operations
+spec:
+  deviceInboundEndpointTypes:
+  - endpointType: Custom.SiemensS7
+    version: "1.0"
+  runtimeConfiguration:
+    runtimeConfigurationType: managedConfiguration
+    managedConfigurationSettings:
+      managedConfigurationType: imageConfiguration
+      imageConfigurationSettings:
+        imageName: aio-s7-connector   # same code as aio-modbus-connector; this image starts in S7 mode
+        imagePullPolicy: Never # image is imported into k3d by deploy-k3d.sh
+        replicas: 1
+        tagDigestSettings:
+          tagDigestType: tag
+          tag: "0.2.0"
+  mqttConnectionConfiguration:
+    host: "aio-broker:18883"
+    authentication:
+      method: ServiceAccountToken
+      serviceAccountTokenSettings:
+        audience: aio-internal
+    tls:
+      mode: Enabled
+      trustedCaCertificateConfigMapRef: azure-iot-operations-aio-ca-trust-bundle

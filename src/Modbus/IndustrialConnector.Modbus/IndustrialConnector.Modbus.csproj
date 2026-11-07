@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Modbus TCP protocol module: addresses, planning, decoding, NModbus client. Depends on Core only. -->
+  <PropertyGroup>
+    <RootNamespace>AioIndustrialConnector.Modbus</RootNamespace>
+    <AssemblyName>IndustrialConnector.Modbus</AssemblyName>
+    <Version>0.2.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NModbus" Version="3.0.83" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\IndustrialConnector.Core\IndustrialConnector.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="IndustrialConnector.Modbus.Tests" />
+  </ItemGroup>
+
+</Project>
